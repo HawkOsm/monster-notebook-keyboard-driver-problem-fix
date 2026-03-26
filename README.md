@@ -1,6 +1,6 @@
 # Ubuntu 24.04 Keyboard Backlight Fix for Monster Notebooks
 
-If you just installed Ubuntu on your Monster notebook (specifically tested on my Tulpar T6 V2.1 running Ubuntu 24.04) and your keyboard lights are completely dead, this guide is for you. 
+If you just installed Ubuntu on your Monster notebook (specifically tested on my Tulpar T6 V2.1 running Ubuntu 24.04) and your keyboard commands are not working, this guide is for you. 
 
 I spent hours trying to get this working. If you have tried OpenRGB, AUCC, or the Tuxedo Control Center and got "No such device" errors, stop what you are doing. This is the actual fix.
 
@@ -75,4 +75,3 @@ Your computer's **Secure Boot** is likely blocking the driver. You need to turn 
 3. Find **Secure Boot** and change it from `Enabled` to `Disabled`.
 4. Save your changes and exit (usually `F10`). 
 5. When Ubuntu boots up, your lights will turn on.
-```
