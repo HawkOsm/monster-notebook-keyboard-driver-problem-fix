@@ -1,26 +1,82 @@
-# Monster Keyboard Backlight Fix (Ubuntu 24.04)
+# Ubuntu 24.04 Keyboard Backlight Fix for Monster Notebooks (Tulpar)
 
-If you have a Monster Tulpar (specifically tested on the T6 V2.1) running Ubuntu 24.04 and cannot get your keyboard backlight to turn on, this repository explains exactly why it happens and how to fix it. 
+If you just installed Ubuntu on your Monster notebook (specifically tested on my Tulpar T6 V2.1 running Ubuntu 24.04) and your keyboard lights are completely dead, this guide is for you. 
 
-This fix applies to almost all Monster notebooks, as they share the same underlying barebones chassis (manufactured by Tongfang/Clevo) as brands like System76, XMG, and Tuxedo.
+I spent hours trying to get this working. If you have tried OpenRGB, AUCC, or the Tuxedo Control Center and got "No such device" errors, stop what you are doing. This is the actual fix.
 
-## 🛑 The Problem: Why Standard Tools Fail
+## 🛑 Why Standard Apps Don't Work
 
-If you have tried using OpenRGB, AUCC, or the Tuxedo Control Center, you likely hit a brick wall. Here is the technical breakdown of why:
+If you are not a developer and just want your lights on, skip to the **Installation** section. But if you are curious why this is so broken out of the box:
 
-### 1. The Hardware Architecture (Why OpenRGB fails)
-Most standard RGB tools scan your system's internal USB bus for a lighting controller chip (like the ITE 8291). If you run `lsusb` in your terminal and don't see an ITE device, your keyboard lighting isn't routed through USB. Instead, Monster hardwires the lighting directly into the motherboard's **Embedded Controller (EC)**. To change the lights, the operating system needs a kernel driver that can speak directly to the EC via WMI/ACPI calls.
+1. **No USB Connection:** Apps like OpenRGB look for a keyboard connected via an internal USB. Monster laptops don't do this; the lights are wired directly into the motherboard.
+2. **The Tuxedo Block:** Tuxedo Computers makes a Linux driver for our exact motherboard type. However, their driver checks your system name. When it reads `MONSTER` instead of `TUXEDO`, it intentionally blocks the connection and refuses to turn on the lights.
 
-### 2. The Software Lockout (Why Tuxedo Drivers fail)
-Tuxedo Computers actually wrote the exact Linux kernel module needed to talk to this Embedded Controller. However, their official driver has a strict, hardcoded vendor check. When the driver loads, it reads your motherboard's DMI/BIOS data. When it reads `MONSTER` as the system vendor instead of `TUXEDO`, it intentionally blocks the connection, throwing a `No such device` error and refusing to load.
+We are going to use a community-modified driver (thanks to NovaCustom) that removes this name check so our keyboards can finally turn on.
 
-## ✅ The Solution: The Unlocked Driver
+---
 
-To fix this, we use a community-unlocked version of the Clevo keyboard driver. A Linux hardware vendor named NovaCustom forked the original Tuxedo driver and stripped out the strict brand-name BIOS lockouts. This allows the driver to communicate seamlessly with the Embedded Controller on *any* compatible Tongfang/Clevo chassis, forcing the Monster notebook lights to wake up.
+## ✅ Installation Guide (Step-by-Step)
 
-### Installation Steps
+Follow these steps exactly. You do not need any coding experience, just copy and paste.
 
-Open your terminal and run this single command to download, compile, and install the unlocked driver automatically:
+### Step 1: Open Your Terminal
+Press `Ctrl` + `Alt` + `T` on your keyboard to open the terminal.
+
+### Step 2: Run the Installer
+Copy the exact line of code below, paste it into your terminal, and press `Enter`. It will ask for your computer password. When you type your password, nothing will show up on screen (this is normal in Linux), just type it and press `Enter`.
 
 ```bash
 wget [https://github.com/wessel-novacustom/clevo-keyboard/raw/master/kb.sh](https://github.com/wessel-novacustom/clevo-keyboard/raw/master/kb.sh) && chmod +x kb.sh && sudo ./kb.sh
+```
+*Wait for the terminal to finish downloading and installing the driver.*
+
+### Step 3: 🛑 REBOOT YOUR COMPUTER 🛑
+**This is the most important step. Your lights will NOT turn on yet.** The computer needs to restart to load the new driver. 
+
+Close everything and restart your laptop. 
+
+### Step 4: You Have Lights!
+When your laptop turns back on, your keyboard should light up in solid **White**. 
+
+You can now use your keyboard shortcuts to control the lights (hold the `Fn` key and press the keys on your Numpad):
+* `Fn` + `/` : Turn lights On or Off
+* `Fn` + `*` : Cycle through colors
+* `Fn` + `+` : Turn brightness up
+* `Fn` + `-` : Turn brightness down
+
+---
+
+## 🎨 Bonus: Easy Color Changing Script
+
+If you don't want to use the keyboard shortcuts and want a quick way to change your default boot color from the terminal, you can create a simple script.
+
+Run this command to create a file called `color.sh`:
+```bash
+echo -e '#!/bin/bash\nif [ -z "$1" ]; then\n  echo "Usage: ./color.sh [RED|GREEN|BLUE|YELLOW|MAGENTA|CYAN|WHITE|BLACK]"\n  exit 1\nfi\necho "options tuxedo_keyboard color=${1^^}" | sudo tee /etc/modprobe.d/tuxedo_keyboard.conf\nsudo rmmod tuxedo_keyboard\nsudo modprobe tuxedo_keyboard\necho "Color changed to ${1^^}!"' > color.sh && chmod +x color.sh
+```
+
+Now, whenever you want to change your color instantly, just open a terminal and type:
+```bash
+./color.sh blue
+```
+*(You can use red, green, blue, yellow, magenta, cyan, white, or black).*
+
+---
+
+## 🚑 Troubleshooting
+
+**"I did everything and restarted, but my lights are still off!"**
+
+Your computer's **Secure Boot** is likely blocking the driver. You need to turn it off.
+
+
+1. Restart your computer and rapidly press `F2` (or your specific BIOS key, sometimes `Delete`) to enter the BIOS menu.
+2. Use your arrow keys to find the **Security** or **Boot** tab.
+3. Find **Secure Boot** and change it from `Enabled` to `Disabled`.
+4. Save your changes and exit (usually `F10`). 
+5. When Ubuntu boots up, your lights will turn on.
+```
+
+***
+
+How does this look? It reads like a helpful developer stepping in to save the day, explains the core problem simply, and gives users an immediate script to manage their colors. Would you like me to help you set up the actual git commands to push this directly to your GitHub account?
