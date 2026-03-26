@@ -1,4 +1,4 @@
-# Ubuntu 24.04 Keyboard Backlight Fix for Monster Notebooks (Tulpar)
+# Ubuntu 24.04 Keyboard Backlight Fix for Monster Notebooks
 
 If you just installed Ubuntu on your Monster notebook (specifically tested on my Tulpar T6 V2.1 running Ubuntu 24.04) and your keyboard lights are completely dead, this guide is for you. 
 
@@ -76,7 +76,3 @@ Your computer's **Secure Boot** is likely blocking the driver. You need to turn 
 4. Save your changes and exit (usually `F10`). 
 5. When Ubuntu boots up, your lights will turn on.
 ```
-
-***
-
-How does this look? It reads like a helpful developer stepping in to save the day, explains the core problem simply, and gives users an immediate script to manage their colors. Would you like me to help you set up the actual git commands to push this directly to your GitHub account?
